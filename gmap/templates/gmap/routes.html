@@ -1,0 +1,283 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> Google Map </title>
+  <!-- Bootstrap CSS   -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+  <link href="{% static 'gmap/css/gmap.css' %}" rel="stylesheet">
+  <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
+
+  <script
+    src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+
+  <!-- Ionicons -->
+  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+  {% load staticfiles %}
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
+  <!-- Tempusdominus Bootstrap 4 -->
+  <link rel="stylesheet" href="{% static 'plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
+  <!-- iCheck -->
+  <link rel="stylesheet" href="{% static 'plugins/icheck-bootstrap/icheck-bootstrap.min.css' %}">
+  <!-- JQVMap -->
+  <link rel="stylesheet" href="{% static 'plugins/jqvmap/jqvmap.min.css' %}">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
+  <!-- overlayScrollbars -->
+  <link rel="stylesheet" href="{% static 'plugins/overlayScrollbars/css/OverlayScrollbars.min.css' %}">
+  <!-- Daterange picker -->
+  <link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker.css' %}">
+  <!-- summernote -->
+  <link rel="stylesheet" href="{% static 'plugins/summernote/summernote-bs4.min.css' %}">
+
+  <script src="{% static 'plugins/userUtils.js'%}"></script>
+  <style>
+    .card-container {
+      display: flex;
+      flex-direction: row;
+      width: 550px;
+      margin: 10px;
+      justify-content: space-between;
+    }
+    .table-container {
+      width:79vw;
+      margin-left:20px;
+      margin-top:20px;
+      padding:20px;
+      max-height: 600px;
+      overflow: auto;
+    }
+    .routes-table{
+      font-size: smaller;
+    }
+    .reviewer-name{
+      font-size: x-small;
+      font-style: italic;
+    }
+    .add-user-icon{
+      margin-left: 5px;
+      background-color: transparent;
+      border: none;
+      color: #007bff;
+    }
+  </style>
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+  <div class="">
+
+    <!-- Navbar -->
+    <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+      <!-- Left navbar links -->
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+        </li>
+      </ul>
+
+    </nav>
+    <!-- /.navbar -->
+
+    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+      <!-- Brand Logo -->
+      <a href="/dashboard/" class="brand-link">
+        <span class="brand-text font-weight-light" style="margin-left:13px;">Forensics</span>
+      </a>
+
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <!-- Sidebar user panel (optional) -->
+        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+
+          <div class="info">
+            <a href="#" class="d-block" id="current_user">{{ current_user }}</a>
+          </div>
+        </div>
+
+
+
+        <!-- Sidebar Menu -->
+        <nav class="mt-2">
+          <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+            <li class="nav-item">
+              <a href="/dashboard/" class="nav-link">
+                <i class="nav-icon text-info fas fa-window-restore"></i>
+                <p>Applications</p>
+              </a>
+            </li>
+            {% if 'admin' == current_user.groups.all.0.name %}
+            <li class="nav-item">
+              <a href="/dashboard/users/" class="nav-link">
+                <i class="nav-icon text-info fas fa-users"></i>
+               <i class="nav-icon text-info fas fa-users"></i>
+                <p>Users Management</p>
+              </a>
+            </li>
+            {% endif %}
+
+            <li class="nav-item">
+              <a href="/dashboard/routes/" class="nav-link">
+                <i class="nav-icon text-info fas fa-route"></i>
+                <p>Case management</p>
+              </a>
+            </li>
+
+            <li class="nav-item" style="position: absolute;top: 60vh">
+              <a href="/dashboard/logout/" class="nav-link">
+                <i class="nav-icon text-info fas fa-sign-out-alt"></i>
+                <p>Logout</p>
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <!-- /.sidebar-menu -->
+      </div>
+      <!-- /.sidebar -->
+    </aside>
+
+    <section class="content-wrapper">
+      <div class="card card-body table-responsive p-0 table-container" > 
+        <table class="table table-head-fixed text-nowrap routes-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>#</th>
+              <th>Case Name</th>
+              <th>Origin <br> lat/lng</th>
+              <th>Destination<br> lat/lng</th>
+              <th>Average <br> Speed (m/s)</th>
+              <th>Status</th>
+              <th>Creator</th> 
+              <th>Created At</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for route in routes %}
+            <tr data-widget="expandable-table" aria-expanded="false">
+              <td>
+                <i class="expandable-table-caret fas fa-caret-right fa-fw"></i>
+              </td>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ route.name }}</td>
+              <td>{{ route.waypoint_set.first.latitude|floatformat:6}} , {{ route.waypoint_set.first.longitude|floatformat:6}} </td>
+              <td>{{ route.waypoint_set.last.latitude|floatformat:6}} , {{ route.waypoint_set.last.longitude|floatformat:6}}</td>
+              <td>{{ route.avg_speed|floatformat:1}} </td>
+              <td>{{ route.status }} {% if 'reviewed' == route.status %} <br> <span class="reviewer-name"> by {{ route.reviewer }}</span> {% endif %} </td>
+              <td>{{ route.route_creator }}</td>
+              <td>{{ route.created_at }}</td>
+              <td>
+                  <a href="/dashboard/route/{{route.id}}/false"><i class="fa fa-eye" aria-hidden="true"></i></a>
+                  {% if 'lead_investigator' == current_user.groups.all.0.name or 'reviewer' == current_user.groups.all.0.name %} 
+                  <a href="/dashboard/route/{{route.id}}/true" style="margin-left:5px;"><i class="fas fa-pen" aria-hidden="true"></i></a>
+                  {% endif %}
+                  {% if 'lead_investigator' == current_user.groups.all.0.name %}
+                  <a class="add-user-icon" onclick="showModal('{{route.id}}' )"><i class="fa fa-user-plus"></i></a>
+                  {% endif %}
+              </td>
+            </tr>
+
+            <tr class="expandable-body">
+              <td colspan="5">
+                <div>
+                  <h5>waypoints</h5>
+                              
+                  <table class="">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Latitude</th>
+                        <th>longitude</th>
+                        <th>speed<br>(m/s)</th>
+                        <th>distance<br>(km)</th>
+                        <th>created at</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for w in route.waypoint_set.all %}
+                        <tr> 
+                          <td>{{forloop.counter}}</td>
+                          <td>{{w.latitude}}</td>
+                          <td>{{w.longitude}}</td>
+                          <td>{{w.speed}}</td>
+                          <td>{{w.distance}}</td>
+                          <td>{{w.created_at|date:"g"}}:{{w.created_at|date:"i"}}:{{w.created_at|date:"s"}} {{w.created_at|date:"a"}}</td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </td>
+            </tr>
+
+            {% endfor %}
+
+           
+          </tbody>
+        </table>
+
+      </div>
+    </section>
+
+
+    <div class="modal-backdrop fade show" id="modal-back-drop" style="display: none;"></div>
+    <div class="modal" tabindex="-1" role="dialog" id="modal-primary">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Assign Reviewer</h5>
+            <button type="button" class="close" onclick="hideModal()">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <form action="/dashboard/route/update_reviewer/" method="post">
+            {% csrf_token %}
+            <div class="modal-body">
+              <input style="display: none;" name="route_id" id="route_id">
+              <p>Case# <span id="case_number"></span></p>
+              <select required class="form-control slct-grp" name="reviewer_id" id='reviewer_id'>
+                {% for reviewer in reviewers%}
+                  <option value="{{ reviewer.id }}">{{ reviewer.username }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-primary">Save changes</button>
+              <button type="button" class="btn btn-secondary" onclick="hideModal()">Close</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+
+  <!-- jQuery -->
+  <script src="{% static 'plugins/jquery/jquery.min.js'%}"></script>
+  <!-- AdminLTE App -->
+  <script src="{% static 'dist/js/adminlte.min.js'%}"></script>
+
+  <script>
+    function showModal(route_id){ 
+      document.getElementById("modal-primary").style.display = "block";
+      document.getElementById("modal-back-drop").style.display = "block";
+      document.getElementById("case_number").innerHTML = route_id
+      document.getElementById("route_id").value = route_id
+    }
+    function hideModal(){
+      document.getElementById("modal-primary").style.display = "none";
+      document.getElementById("modal-back-drop").style.display = "none";
+    }
+  
+  </script>
+  </div>
+</body>
+
+</html>

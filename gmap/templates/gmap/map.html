@@ -1,0 +1,583 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title> Forensics </title>
+    {% load staticfiles %}
+    <script src="{% static 'plugins/geoxml3/geoxml3.js'%}"></script>
+    <script src="{% static 'plugins/mapStyles.js'%}"></script>
+    <script src="{% static 'plugins/pointsUtils.js'%}"></script>
+    <script src="{% static 'plugins/waypointsUtils.js'%}"></script>
+    <script src="{% static 'plugins/mapInitializer.js'%}"></script>
+    <script src="{% static 'plugins/userUtils.js'%}"></script>
+    <!-- bootstrap stepper -->
+    <script src="{% static 'plugins/bs-stepper/js/bs-stepper.min.js'%}"></script>
+    <link rel="stylesheet" href="{% static 'plugins/bs-stepper/css/bs-stepper.min.css'%}">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
+    <!-- Tempusdominus Bootstrap 4 -->
+    <link rel="stylesheet" href="{% static 'plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
+    <!-- iCheck -->
+    <link rel="stylesheet" href="{% static 'plugins/icheck-bootstrap/icheck-bootstrap.min.css' %}">
+    <!-- JQVMap -->
+    <link rel="stylesheet" href="{% static 'plugins/jqvmap/jqvmap.min.css' %}">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
+    <!-- overlayScrollbars -->
+    <link rel="stylesheet" href="{% static 'plugins/overlayScrollbars/css/OverlayScrollbars.min.css' %}">
+    <!-- Daterange picker -->
+    <link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker.css' %}">
+    <!-- summernote -->
+    <link rel="stylesheet" href="{% static 'plugins/summernote/summernote-bs4.min.css' %}">
+
+    <!-- loading statis files done -->
+
+    <!-- Bootstrap CSS   -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+      integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <link href="{% static 'gmap/css/gmap.css' %}" rel="stylesheet">
+    <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
+    
+    <script
+      src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
+   
+    <!-- Cases polyfull -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <!-- Google Font: Source Sans Pro -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <style>
+    .sidebar-collapse{
+      /* width:auto; */
+    }
+    .btn-wrapper{
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      padding:15px 20px 10px;
+      border-top:1px solid rgb(197, 195, 195);
+    }
+     #timeline{
+      position: absolute;
+      z-index: 10;
+      margin-left: 67vw;
+      background-color: #d3d3d39c;
+      /* width:-webkit-fill-available; */
+      height: 90vh;
+      overflow-y: scroll;
+      display:none;
+
+     }
+     #panel{
+      /* width: 175px; */
+      padding-top:105px;
+     }
+     #route_name{
+       width:5.5vw;
+     }
+     #route_name::placeholder {
+      color: gray;
+      font-style: italic;
+      font-size: 0.6em;
+    }
+     #route-header{
+       display: flex;
+       flex-direction: row;
+       justify-content: space-between;
+       /* position: fixed; */
+       /* width: 13vw; */
+       background-color:  #d3d3d39c;
+       padding: 0px 10px 0px 10px;
+     }
+     .stepper-container{
+       display: flex;
+       flex-direction: row;
+       width:59vw;
+       margin-left:52px;
+       margin-right:50px;
+       overflow: scroll;
+     }
+     .stepper-buttons{
+       display: flex;
+       flex-direction: row;
+       justify-content: space-between;
+       width:74.5vw;
+       position: absolute;
+       top:5px;
+       z-index:-1;
+       
+     }
+     .stepper{
+       position:relative; 
+     
+     }
+     #remove_last_waypoint{
+      z-index:100;
+      position:absolute;
+      margin:10px;
+      display:none;
+      background-color: rgb(211,211,211,0.7);
+     }
+     #exit_training_mode{
+      z-index:1;
+      position:absolute;
+      margin:6px 32px;
+      display:none;
+      background-color: rgb(211,211,211,0.7);
+      font-size: x-large;
+      color:black;
+     }
+     #show_traffic_layer{
+      z-index:1;
+      position:absolute;
+      margin:76.5vh 0.85vw;
+      display:none;
+      /* background-color: rgb(211,211,211,0.7); */
+      background-image: url("https://maps.gstatic.com/tactile/layerswitcher/ic_traffic-2x.png");
+      /* background-repeat: no-repeat;
+      background-attachment: fixed; */
+      background-position: center; 
+      background-size: 79px 79px;
+      width:79px;
+      height:79px;
+      border:3px solid white;
+      color: white;
+      font-size: 14px;
+      padding-top: 44px;
+    }
+     #map{
+       height:90vh;
+       /* width:80vw; */
+       margin-left:2px;
+     }
+     #traffic_layer_setter{
+      z-index:1;
+      position:absolute;
+      margin:83vh 25vw;
+      display:none;
+      background-color: white;
+
+      font-size:12px;
+     }
+     
+    .up {
+      bottom:100% !important; 
+      top:auto !important; 
+      transform: translate3d(15px, -2px, 0px)!important;
+    }
+    #dropdownIntervalMenuButton{
+      font-size: 12px
+    }
+    .vr{
+      margin-left:5px;
+      margin-right:5px;
+    }
+    .rectangle{
+      width: 76px;
+      height: 8px;
+      margin-top: 6px;
+      /* background-color: black;
+      border-radius: 2px;
+      margin: 5px 2.5px; */
+      background-image: url("https://maps.gstatic.com/tactile/layers/traffic-legend-20150511.png");
+    }
+    table.adp-directions{
+      display: none;
+    }
+    .status-dropdown-menu{
+      display: flex;
+      flex-direction: row;
+    }
+    .status-dropdown-menu .dropdown-menu{
+      top: -45px !important;
+      left: 58px !important;
+      width: fit-content;
+      min-width: 10px !important;
+    }
+    .status-dropdown-menu .dropdown-menu > a {
+      padding:2px 10px;
+    }
+    .new-case-btn{
+      width: 108px;
+      text-align: center;
+      text-align: center;
+      padding: 0.5rem 1rem;
+    }
+    </style>  
+  </head>
+
+  <body class="hold-transition sidebar-mini layout-fixed">
+
+
+
+    <div class="wrapper">
+     
+      <!-- Navbar -->
+      <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+        <!-- Left navbar links -->
+        <ul class="navbar-nav" >
+          <li class="nav-item" >
+            <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+          </li>
+          {% if 'reviewer' != current_user.groups.all.0.name %}
+          <li >
+            <span class="nav-link dropdown new-case-btn btn btn-light" type="button" onclick="showRoute()">New Case</span>
+          </li>
+          
+          {% endif %} 
+          <li class="dropdown">
+            <span class="nav-link  dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
+              aria-expanded="false">
+              Location
+            </span>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+              <a class="dropdown-item location-option" >Plymouth</a>
+              <a class="dropdown-item location-option" >London</a>
+              <a class="dropdown-item location-option" >Plympton</a>
+            </div>
+          </li>
+          
+          <li class="dropdown">
+            <span class="nav-link dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
+              aria-expanded="false">
+              Map styles
+            </span>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" >
+              <a class="dropdown-item style-option">Default</a>
+              <a class="dropdown-item style-option">Silver</a>
+              <a class="dropdown-item style-option">Night mode</a>
+              <a class="dropdown-item style-option">Main</a>
+              <a class="dropdown-item style-option">Hide features</a>
+            </div>
+          </li>
+
+        </ul>
+        <br>
+        {% if messages %}
+         {% for message in messages %}
+          <div class="alert {% if message.tags == 'success' %}alert-success{% else %} alert-danger {% endif %} alert-dismissible" style="position:absolute;top: 0.5vh;left: 35vw;width: 180px;" role="alert">
+            {{message}}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          {% endfor %}
+        {% endif %}
+     
+      </nav>
+    
+      <!-- /.navbar -->
+      
+      <!-- Main Sidebar Container -->
+      <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        <!-- Brand Logo -->
+        <a href="/dashboard/" class="brand-link" >
+          <span class="brand-text font-weight-light" style="margin-left:13px;">Forensics</span>
+        </a>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+          <!-- Sidebar user panel (optional) -->
+          <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+           
+            <div class="info">
+              <a href="#" class="d-block" id="current_user">{{current_user}}</a>
+            </div>
+          </div>
+
+         
+          <!-- Sidebar Menu -->
+          <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+              <!-- Add icons to the links using the .nav-icon class
+                    with font-awesome or any other icon font library -->
+              
+              {% if 'reviewer' != current_user.groups.all.0.name %}
+              <li class="nav-item" id="add-cam">
+                <a href="#" class="nav-link" onclick="allowAddMarker()">
+                  <i class="nav-icon text-info fas fa-plus"></i>
+                  <p >
+                    Add Camera 
+                    <i class="fas fa-angle-left right"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview" style="padding-top:10px;">
+                  <li class="nav-item">
+                    <div class="card card-info" style="width:210px;margin-left: auto;margin-right: auto;">
+                      <!-- /.card-header -->
+                      <!-- form start -->
+                      <form class="form-horizontal" action='/dashboard/map/' method="POST">
+                        {% csrf_token %}
+                        <div class="card-body">
+                          <div class="form-group row">
+                            <label for="inputEmail3" class="col-sm-2 col-form-label">Lat</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="lat" name="lat" placeholder="Latitude">
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <label for="inputPassword3" class="col-sm-2 col-form-label">Lng</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="lng" name="lng" placeholder="Longitude">
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <label for="inputPassword3" class="col-sm-2 col-form-label">Add</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" name='addr' id="addr" placeholder="Address">
+                              <input hidden type="text" class="form-control" name='area' id="area" placeholder="Address">
+                              <input hidden type="text" class="form-control" name='postcode' id="postcode" placeholder="Address">
+                              <input hidden type="text" class="form-control" name='id' id="id" placeholder="Address">
+                            </div>
+                          </div>
+                        </div>
+                        <!-- /.card-body -->
+                        <div class="btn-wrapper">
+                          <button type="submit" class="btn btn-info" onclick="removeMarker()">Cancel</button>
+                          <button type="submit" class="btn btn-info">Save</button>
+                        </div>
+                        <!-- /.card-footer -->
+                      </form>
+                    </div>
+                  </li>
+
+                </ul>
+              </li>
+
+              <li class="nav-item" id="rmv-cam">
+                <a href="#" class="nav-link" >
+                  <i class="nav-icon text-info fas fa-minus"></i>
+                  <p>
+                    Remove Camera
+                    <i class="fas fa-angle-left right"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview" style="padding-top:10px;">
+                  <li class="nav-item">
+                    <div class="card card-info" style="width:210px;margin-left: auto;margin-right: auto;">
+                      <!-- form start -->
+                      <form class="form-horizontal" action='/dashboard/map/' method="POST">
+                        {% csrf_token %}
+                        <div class="card-body">
+                          <div class="form-group row">
+                            <label for="inputEmail3" class="col-sm-2 col-form-label">Lat</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="rmv_frm_lat" name="lat" placeholder="Latitude">
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <label for="inputPassword3" class="col-sm-2 col-form-label">Lng</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="rmv_frm_lng" name="lng" placeholder="Longitude">
+                            </div>
+                          </div>
+                          <div class="form-group row">
+                            <label for="inputPassword3" class="col-sm-2 col-form-label">Add</label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" name='addr' id="rmv_frm_addr" placeholder="Address">
+                              <input hidden type="text" class="form-control" name='area' id="rmv_frm_area" placeholder="Address">
+                              <input hidden type="text" class="form-control" name='postcode' id="rmv_frm_postcode" placeholder="Address">
+                              <input hidden type="text" class="form-control" name='rmv_frm_id' id="rmv_frm_id" placeholder="Address">
+                            </div>
+                          </div>
+                        </div>
+                        <!-- /.card-body -->
+                        <div class=" btn-wrapper">
+                          <button type="button" class="btn btn-info" onclick="resetRmvCamForm()">Cancel</button>
+                          <button type="submit" class="btn btn-info" formaction="/dashboard/camera/delete/">Delete</button>
+                        </div>
+                        <!-- /.card-footer -->
+                      </form>
+                    </div>
+                  </li>
+              
+                </ul>
+              </li>
+              {% endif %}
+              <li class="nav-item" style="position: absolute;top: 60vh">
+                <a href="/dashboard/logout/" class="nav-link">
+                  <i class="nav-icon text-info fas fa-sign-out-alt"></i>
+                  <p>Logout</p>
+                </a>
+              </li>
+            </ul>
+          </nav>
+          <!-- /.sidebar-menu -->
+        </div>
+        <!-- /.sidebar -->
+      </aside>
+
+
+
+    
+      <div class="content-wrapper">
+        <div id="timeline">
+          <div style=" position: fixed;">
+            <span>Total Distance: 
+              <span id="total"></span>
+            </span>       
+            {%if edit_route %}
+            <form action="/dashboard/route/update/" method="POST" id="route-header">
+            {% else %}
+            <form action="/dashboard/waypoints/save/" method="POST" id="route-header">
+            {% endif %}
+              {% csrf_token %}
+              <input hidden type="text" name="wayPoints" id="wayPoints">
+              <input hidden type="text" name="route_status" id="route_status" >
+              <input hidden type="text" name="route_id" id="route_id" value="{{ route.id }}">
+              <input type="text" name="route_name" id="route_name" placeholder="Case Number..." value="{{ route.name }}"    {% if 'reviewer' == current_user.groups.all.0.name %} disabled {% endif %} >
+              <button type="submit" class="btn btn-dark" style="width:10vw;" id="save_case">
+                {%if edit_route %} Update Case {% else %} Save Case {% endif %}
+              </button>
+            </br>
+            </form>  
+          </div>
+          <div id="panel" ></div>
+        </div>
+        <span id="remove_last_waypoint" onclick="removeLastWayPoint()" class="fas fa-undo-alt"></span>
+        <a id="exit_training_mode" class="fa fa-times" href="/dashboard/map/"></a>
+        <button id="show_traffic_layer" class="btn" onclick="toggleTrafficLayer()">Traffic</button>
+        <div id="traffic_layer_setter" class="btn dropup">
+          
+              <div>
+                <span class=" dropdown-toggle" type="button" id="dropdownIntervalMenuButton" data-toggle="dropdown"
+                  aria-haspopup="true" aria-expanded="false">
+                  Refresh Interval
+                </span>
+                <div class="dropdown-menu up" aria-labelledby="dropdownMenuButton">
+                  <a class="dropdown-item refresh-interval-option">1 min</a>
+                  <a class="dropdown-item refresh-interval-option">5 min</a>
+                  <a class="dropdown-item refresh-interval-option">10 min</a>
+                </div>
+              </div>
+              <span class="vr">
+              </span>
+              <span style="margin-right:2.5px; font-style: italic;">Fast</span>  
+              <div class="rectangle"></div>
+              <span style="margin-left:2.5px; font-style: italic;">Slow</span>
+        </div>
+        <div id="map">
+        </div>
+        
+        <div class="stepper" style="display: none;z-index:100">
+          <div class="bs-stepper stepper-container" >
+            <div class="bs-stepper-header" role="tablist" id="waypoints-steps">
+              <!-- your steps here -->
+            </div>
+          </div>
+          <div class="stepper-buttons">
+            <span  onclick="removeLastWayPoint()" class="fas fa-undo-alt" style="margin:20px;font-size:25px;background-color: #d3d3d39c;"></span>
+            <span class="status-dropdown-menu">
+              <span  onclick="restoreLastWayPoint()" class="fas fa-redo" style="margin:20px;font-size:25px;background-color: #d3d3d39c;"></span>
+                {% if 'reviewer' == current_user.groups.all.0.name %}
+              <span class="dropdown" id="status-dropdown-menu-items">
+                <span class="nav-link  dropdown-toggle  btn btn-secondary" type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                  aria-haspopup="true" aria-expanded="false">
+                  status
+                </span>
+                <div class="dropdown-menu"  aria-labelledby="dropdownMenuButton">
+                  <a class="dropdown-item status-option">pending</a>
+                  <a class="dropdown-item status-option">in progress</a>
+                  <a class="dropdown-item status-option">reviewed</a>
+                </div>
+              </span>
+                {% endif %}
+            </span>  
+          </div>
+        </div>
+        <script
+          src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB58CtCPUBsCAagvDpQ2VOHWvr56p0H4XE&callback=initMap&v=weekly&channel=2"
+          async></script>
+       
+      </div>    
+    
+      <script> 
+        var current_user_group = "{{ current_user.groups.all.0.name }}";
+        var editRoute = false || eval("{{ edit_route }}");
+        var trafficLayerRefresher;
+        var lastWayPointStreetNameArr=[];
+        var trafficLayer;
+        var trafficLayerRefreshTimeInterval = 60000;
+        var directionsService, directionsRenderer;
+        var directionsStreetService, directionsStreetRenderer;
+        var suggested_streets_markers = [];
+        var allowMapClick=false
+        var allowAddWayPoint = false
+        var wayPoints = []
+        var popedWayPoints = []
+        var map;
+        var markerToRemove;
+        var geoXML3Parser;
+        var dbPoints = getDbPoints()
+        var dbMarkers = getDbMarkers(dbPoints)      
+        getDbWayPoints()
+       
+        function allowAddMarker(){
+          allowMapClick=true
+        }
+        function resetRmvCamForm() {
+            document.getElementById('rmv_frm_lat').value = ""
+            document.getElementById('rmv_frm_lng').value = ""
+            document.getElementById('rmv_frm_addr').value = ""
+            document.getElementById('rmv_frm_id').value = ""
+        }
+        function getDbPoints() { 
+          var dbPointsAsString = "{{ points }}"; // variable points parsed from views (points=context)
+          // console.log(dbPointsAsString)          // print as string in web console
+
+          // now replacing whole code to json format
+          dbPointsAsString = dbPointsAsString.replace(/&quot;/g, '\"'); // replacing quot to "
+          // transform array of objects to actual objects remove "[ ]"
+          dbPointsAsString = dbPointsAsString.replace("[", "");
+          objectString = dbPointsAsString.replace("]", "");
+          // console.log(objectString) // down to this point it's been string manipulation
+          var dbPoints = (new Function("return [" + objectString + "];")());
+          // console.log("dbPoints", dbPoints)
+          return dbPoints
+        }
+        function closeInfoWindow(infoWindow) {
+          infoWindow.parentElement.parentElement.parentElement.parentElement.style.display = 'none'
+        }
+        function getDbWayPoints() {
+          var waypoints = eval("{{ waypoints }}");
+          if (typeof waypoints !== "undefined") {
+            // document.getElementById("route_name").value = "{{ route_name }}";
+            for (waypoint of waypoints) {
+              wayPoints.push({
+                location: {
+                  lat: waypoint[0],
+                  lng: waypoint[1],
+                  created_at: waypoint[2],
+                },
+              });
+            }
+          }
+          console.log("getDbWayPoints done")
+        }
+      </script>
+
+
+        <!-- jQuery -->
+        <script src="{% static 'plugins/jquery/jquery.min.js'%}"></script>
+        <!-- AdminLTE App -->
+        <script src="{% static 'dist/js/adminlte.min.js'%}"></script>
+        <!-- Bootstrap Bundle with Popper -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    
+        <!-- Bootstrap   -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.0.4/popper.js"></script>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+          integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+    </div>  
+   
+  </body>
+</html>
